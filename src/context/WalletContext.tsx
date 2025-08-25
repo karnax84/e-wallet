@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { ethers } from 'ethers';
-import WalletConnectProvider from '@walletconnect/ethereum-provider';
+import EthereumProvider from '@walletconnect/ethereum-provider';
 import axios from 'axios';
 
 // Add type declaration for window.ethereum
@@ -55,13 +55,13 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [account, setAccount] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const walletConnectProviderRef = useRef<WalletConnectProvider | null>(null);
+  const walletConnectProviderRef = useRef<InstanceType<typeof EthereumProvider> | null>(null);
 
   useEffect(() => {
     if (!walletConnectProviderRef.current) {
       const initWalletConnect = async () => {
         try {
-          const provider = await WalletConnectProvider.init({
+          const provider = await EthereumProvider.init({
             projectId,
             chains: [1], // Mainnet
             showQrModal: true,
