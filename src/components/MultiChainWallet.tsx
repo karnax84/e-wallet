@@ -15,12 +15,13 @@ import {
   transferToken
 } from '../utils/ethereum';
 import TokenList from './TokenList';
+import TransactionHistory from './TransactionHistory';
 
 const MultiChainWallet: React.FC = () => {
   const { account, connect, disconnect } = useWallet();
   const [allTokens, setAllTokens] = useState<Token[]>([]);
   const [isLoadingBalances, setIsLoadingBalances] = useState(false);
-  const [viewMode, setViewMode] = useState<'all' | 'popular'>('all');
+  const [viewMode, setViewMode] = useState<'all' | 'popular' | 'history'>('all');
   
   // Transfer state
   const [selectedToken, setSelectedToken] = useState<Token | null>(null);
@@ -191,9 +192,9 @@ const MultiChainWallet: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className={`grid grid-cols-1 gap-8 ${viewMode === 'history' ? 'lg:grid-cols-1' : 'lg:grid-cols-3'}`}>
           {/* Token List */}
-          <div className="lg:col-span-2">
+          <div className={viewMode === 'history' ? 'w-full' : 'lg:col-span-2'}>
             {/* View Mode Toggle */}
             <div className="mb-6">
               <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
@@ -217,11 +218,23 @@ const MultiChainWallet: React.FC = () => {
                 >
                   Popular
                 </button>
+                <button
+                  onClick={() => setViewMode('history')}
+                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                    viewMode === 'history'
+                      ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  History
+                </button>
               </div>
             </div>
 
-            {/* Token List */}
-            {isLoadingBalances ? (
+            {/* Content based on view mode */}
+            {viewMode === 'history' ? (
+              <TransactionHistory address={account} />
+            ) : isLoadingBalances ? (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -237,8 +250,9 @@ const MultiChainWallet: React.FC = () => {
             )}
           </div>
 
-          {/* Transfer Panel */}
-          <div className="space-y-6">
+          {/* Transfer Panel - Hidden when viewing history */}
+          {viewMode !== 'history' && (
+            <div className="space-y-6">
             {/* Selected Token Info */}
             {selectedToken && selectedChain && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
@@ -338,6 +352,7 @@ const MultiChainWallet: React.FC = () => {
               </ol>
             </div>
           </div>
+          )}
         </div>
       </div>
     </div>

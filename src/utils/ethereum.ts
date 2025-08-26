@@ -6,9 +6,16 @@ export interface Transaction {
   from: string;
   to: string;
   value: string;
+  gasUsed: string;
+  gasPrice: string;
+  blockNumber: number;
   timestamp: number;
-  status: 'pending' | 'confirmed' | 'failed';
-  chainId?: number;
+  chainId: number;
+  chainName: string;
+  tokenSymbol?: string;
+  tokenName?: string;
+  isNative: boolean;
+  status: 'success' | 'failed' | 'pending';
 }
 
 export interface Token {
@@ -732,4 +739,74 @@ export const getChainName = (chainId: number): string => {
 export const getTokenByAddress = (address: string, chainId: number): Token | null => {
   const chainTokens = CHAIN_TOKENS[chainId] || [];
   return chainTokens.find(token => token.address.toLowerCase() === address.toLowerCase()) || null;
+};
+
+// Get transaction history for a wallet across all chains
+export const getTransactionHistory = async (address: string): Promise<Transaction[]> => {
+  const allTransactions: Transaction[] = [];
+  
+  for (const chain of SUPPORTED_CHAINS) {
+    try {
+      const provider = getChainProvider(chain.id);
+      if (!provider) continue;
+
+      // Get the last 50 transactions for this chain
+      const currentBlock = await provider.getBlockNumber();
+      const fromBlock = Math.max(0, currentBlock - 10000); // Last ~10000 blocks
+      
+      // Get native token transactions using etherscan-like API or block scanning
+      // For now, we'll focus on ERC-20 token transfers which are more reliable
+      
+      // Get ERC-20 token transactions (Transfer events)
+      for (const token of CHAIN_TOKENS[chain.id] || []) {
+        if (token.isNative) continue;
+        
+        try {
+          const contract = new ethers.Contract(token.address, [
+            'event Transfer(address indexed from, address indexed to, uint256 value)'
+          ], provider);
+          
+          const filter = contract.filters.Transfer(null, null);
+          const events = await contract.queryFilter(filter, fromBlock, currentBlock);
+          
+          for (const event of events) {
+            // Type guard to check if event has args
+            if ('args' in event && event.args) {
+              const args = event.args as unknown as [string, string, bigint];
+              if (args[0].toLowerCase() === address.toLowerCase() || 
+                  args[1].toLowerCase() === address.toLowerCase()) {
+                const receipt = await provider.getTransactionReceipt(event.transactionHash);
+                const tx = await provider.getTransaction(event.transactionHash);
+                const block = await provider.getBlock(tx?.blockNumber || 0);
+                
+                allTransactions.push({
+                  hash: event.transactionHash,
+                  from: args[0],
+                  to: args[1],
+                  value: ethers.formatUnits(args[2], token.decimals),
+                  gasUsed: receipt?.gasUsed?.toString() || '0',
+                  gasPrice: tx?.gasPrice?.toString() || '0',
+                  blockNumber: tx?.blockNumber || 0,
+                  timestamp: block?.timestamp || 0,
+                  chainId: chain.id,
+                  chainName: chain.name,
+                  tokenSymbol: token.symbol,
+                  tokenName: token.name,
+                  isNative: false,
+                  status: receipt?.status === 1 ? 'success' : 'failed'
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error fetching ${token.symbol} transactions on ${chain.name}:`, error);
+        }
+      }
+    } catch (error) {
+      console.error(`Error fetching transactions for ${chain.name}:`, error);
+    }
+  }
+  
+  // Sort by timestamp (newest first)
+  return allTransactions.sort((a, b) => b.timestamp - a.timestamp);
 };
