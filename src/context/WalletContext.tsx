@@ -62,7 +62,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (!walletConnectProviderRef.current) {
       const initWalletConnect = async () => {
         try {
-                               const provider = await EthereumProvider.init({
+          const provider = await EthereumProvider.init({
             projectId,
             chains: ENV_CONFIG.USE_TESTNET ? TESTNET_CONFIG.CHAINS : MAINNET_CONFIG.CHAINS,
             optionalChains: ENV_CONFIG.USE_TESTNET ? TESTNET_CONFIG.CHAINS : MAINNET_CONFIG.CHAINS,
