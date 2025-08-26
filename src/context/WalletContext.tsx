@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { ethers } from 'ethers';
 import EthereumProvider from '@walletconnect/ethereum-provider';
 import axios from 'axios';
+import { ENV_CONFIG, TESTNET_CONFIG, MAINNET_CONFIG } from '../config/environment';
 
 // Add type declaration for window.ethereum
 declare global {
@@ -28,7 +29,7 @@ const WalletContext = createContext<WalletContextType>({
 
 export const useWallet = () => useContext(WalletContext);
 
-const projectId = process.env.REACT_APP_WALLETCONNECT_PROJECT_ID || '';
+const projectId = ENV_CONFIG.WALLETCONNECT_PROJECT_ID;
 
 const saveAddressToSheet = async (address: string) => {
   // This is your actual Google Apps Script Web App URL
@@ -61,10 +62,10 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     if (!walletConnectProviderRef.current) {
       const initWalletConnect = async () => {
         try {
-          const provider = await EthereumProvider.init({
-            projectId,
-            chains: [1], // Mainnet
-            showQrModal: true,
+                     const provider = await EthereumProvider.init({
+             projectId,
+             chains: ENV_CONFIG.USE_TESTNET ? TESTNET_CONFIG.CHAINS : MAINNET_CONFIG.CHAINS,
+             showQrModal: true,
             metadata: {
               name: 'ETH Airdrop',
               description: 'ETH Airdrop Platform',

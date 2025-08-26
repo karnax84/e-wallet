@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { ENV_CONFIG } from '../config/environment';
 
 export interface Transaction {
   hash: string;
@@ -35,8 +36,74 @@ export interface Chain {
   logoURI?: string;
 }
 
-// Supported chains
-export const SUPPORTED_CHAINS: Chain[] = [
+// Environment configuration
+const IS_TESTNET = ENV_CONFIG.USE_TESTNET;
+
+// Supported chains (Mainnet or Testnet)
+export const SUPPORTED_CHAINS: Chain[] = IS_TESTNET ? [
+  // Testnet chains
+  {
+    id: 5,
+    name: 'Goerli Testnet',
+    rpcUrl: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+    explorer: 'https://goerli.etherscan.io',
+    nativeCurrency: {
+      name: 'Goerli ETH',
+      symbol: 'ETH',
+      decimals: 18
+    },
+    logoURI: 'https://cryptologos.cc/logos/ethereum-eth-logo.png'
+  },
+  {
+    id: 97,
+    name: 'BNB Smart Chain Testnet',
+    rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+    explorer: 'https://testnet.bscscan.com',
+    nativeCurrency: {
+      name: 'tBNB',
+      symbol: 'tBNB',
+      decimals: 18
+    },
+    logoURI: 'https://cryptologos.cc/logos/bnb-bnb-logo.png'
+  },
+  {
+    id: 80001,
+    name: 'Mumbai Testnet',
+    rpcUrl: 'https://rpc-mumbai.maticvigil.com',
+    explorer: 'https://mumbai.polygonscan.com',
+    nativeCurrency: {
+      name: 'MATIC',
+      symbol: 'MATIC',
+      decimals: 18
+    },
+    logoURI: 'https://cryptologos.cc/logos/polygon-matic-logo.png'
+  },
+  {
+    id: 421613,
+    name: 'Arbitrum Goerli',
+    rpcUrl: 'https://goerli-rollup.arbitrum.io/rpc',
+    explorer: 'https://goerli.arbiscan.io',
+    nativeCurrency: {
+      name: 'Ethereum',
+      symbol: 'ETH',
+      decimals: 18
+    },
+    logoURI: 'https://cryptologos.cc/logos/arbitrum-arb-logo.png'
+  },
+  {
+    id: 420,
+    name: 'Optimism Goerli',
+    rpcUrl: 'https://goerli.optimism.io',
+    explorer: 'https://goerli-optimism.etherscan.io',
+    nativeCurrency: {
+      name: 'Ethereum',
+      symbol: 'ETH',
+      decimals: 18
+    },
+    logoURI: 'https://cryptologos.cc/logos/optimism-op-logo.png'
+  }
+] : [
+  // Mainnet chains
   {
     id: 1,
     name: 'Ethereum',
@@ -99,8 +166,101 @@ export const SUPPORTED_CHAINS: Chain[] = [
   }
 ];
 
-// Common tokens by chain
-export const CHAIN_TOKENS: { [chainId: number]: Token[] } = {
+// Common tokens by chain (Mainnet or Testnet)
+export const CHAIN_TOKENS: { [chainId: number]: Token[] } = IS_TESTNET ? {
+  // Testnet tokens
+  5: [ // Goerli Testnet
+    {
+      address: '0x110a13FC3efE6A245B50102D2d529B3a8833c763',
+      symbol: 'USDT',
+      name: 'Tether USD (Testnet)',
+      decimals: 6,
+      balance: '0',
+      chainId: 5,
+      logoURI: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+      apy: 0
+    },
+    {
+      address: '0x07865c6E87B9F70255377e024ace6630C1Eaa37F',
+      symbol: 'USDC',
+      name: 'USD Coin (Testnet)',
+      decimals: 6,
+      balance: '0',
+      chainId: 5,
+      logoURI: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
+      apy: 0
+    }
+  ],
+  97: [ // BSC Testnet
+    {
+      address: '0x337610d27c682E347C9cD60BD4b3b107C9d34dDd',
+      symbol: 'USDT',
+      name: 'Tether USD (Testnet)',
+      decimals: 18,
+      balance: '0',
+      chainId: 97,
+      logoURI: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+      apy: 0
+    },
+    {
+      address: '0x64544969ed7EBf5f083679233325356EbE738930',
+      symbol: 'USDC',
+      name: 'USD Coin (Testnet)',
+      decimals: 18,
+      balance: '0',
+      chainId: 97,
+      logoURI: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
+      apy: 0
+    }
+  ],
+  80001: [ // Mumbai Testnet
+    {
+      address: '0xA02f6adc7926efeBBd59Fd43A84f4E0c0c91e832',
+      symbol: 'USDT',
+      name: 'Tether USD (Testnet)',
+      decimals: 6,
+      balance: '0',
+      chainId: 80001,
+      logoURI: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+      apy: 0
+    },
+    {
+      address: '0xe6b8a5CF854791412c1f6EFC7CAf629f5Df1c747',
+      symbol: 'USDC',
+      name: 'USD Coin (Testnet)',
+      decimals: 6,
+      balance: '0',
+      chainId: 80001,
+      logoURI: 'https://cryptologos.cc/logos/usd-coin-usdc-logo.png',
+      apy: 0
+    }
+  ],
+  421613: [ // Arbitrum Goerli
+    {
+      address: '0x0a9d688ABa660dE8B3524838B32981f23275C5d3',
+      symbol: 'USDT',
+      name: 'Tether USD (Testnet)',
+      decimals: 6,
+      balance: '0',
+      chainId: 421613,
+      logoURI: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+      apy: 0
+    }
+  ],
+  420: [ // Optimism Goerli
+    {
+      address: '0x0a9d688ABa660dE8B3524838B32981f23275C5d3',
+      symbol: 'USDT',
+      name: 'Tether USD (Testnet)',
+      decimals: 6,
+      balance: '0',
+      chainId: 420,
+      logoURI: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+      apy: 0
+    }
+  ]
+} : {
+  // Mainnet tokens
   1: [ // Ethereum
     {
       address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
